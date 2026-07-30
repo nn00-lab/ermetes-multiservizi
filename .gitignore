@@ -1,1 +1,8 @@
-backup-og/
+backup-*/
+backup*/
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.vscode/backup-og/
