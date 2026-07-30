@@ -1,0 +1,201 @@
+          "@type": "Service",
+          "name": "Pulizie condominiali"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Pulizie uffici"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Pulizie post cantiere"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Sanificazione ambienti"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Tinteggiature"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Cartongesso"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Manutenzioni immobiliari"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Manutenzione aree verdi"
+        }
+      }
+    ]
+  }
+}
+</script>
+
+
+
+<!-- FAQ SCHEMA -->
+
+<script type="application/ld+json">
+
+{
+"@context":"https://schema.org",
+
+"@type":"FAQPage",
+
+"mainEntity":[
+
+{
+"@type":"Question",
+"name":"Il preventivo Ermetes è gratuito?",
+"acceptedAnswer":{
+"@type":"Answer",
+"text":"Sì, la richiesta di preventivo è gratuita e senza impegno."
+}
+},
+
+
+{
+"@type":"Question",
+"name":"Ermetes lavora anche con aziende e condomini?",
+"acceptedAnswer":{
+"@type":"Answer",
+"text":"Sì, Ermetes offre servizi per privati, aziende, uffici, negozi e condomini."
+}
+}
+
+
+]
+
+}
+
+</script>
+
+
+</head>
+
+
+
+
+
+<body>
+
+
+
+
+
+<header class="topbar">
+
+
+<div class="wrap topbar__row">
+
+
+
+<a href="/"
+class="logo">
+
+
+<img src="/assets/logo/ermetes-logo.svg"
+
+alt="Ermetes Società Cooperativa Sociale Trento">
+
+
+</a>
+
+
+
+
+
+
+<nav class="menu">
+
+<a href="/">
+Home
+</a>
+
+<div class="menu-item">
+
+<a href="/servizi/">
+Servizi
+</a>
+
+<div class="dropdown">
+
+<a href="/servizi/pulizie-uffici-trento.html">
+Pulizie uffici
+</a>
+
+<a href="/servizi/pulizie-condomini-trento.html">
+Pulizie condomini
+</a>
+
+<a href="/servizi/pulizie-post-cantiere-trento.html">
+Post cantiere
+</a>
+
+<a href="/servizi/sanificazione.html">
+Sanificazione
+</a>
+
+<a href="/servizi/tinteggiature.html">
+Tinteggiature
+</a>
+
+<a href="/servizi/cartongesso.html">
+Cartongesso
+</a>
+
+<a href="/servizi/manutenzioni.html">
+Manutenzioni
+</a>
+
+<a href="/servizi/aree-verdi.html">
+Aree verdi
+</a>
+
+</div>
+
+</div>
+
+<a href="/chi-siamo.html">
+Chi siamo
+</a>
+
+<a href="/contatti.html">
+Contatti
+</a>
+
+</nav>
+
+
+
+
+
+
+
+<div class="header-actions">
+

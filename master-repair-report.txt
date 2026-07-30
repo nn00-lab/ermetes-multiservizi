@@ -1,0 +1,27 @@
+Backup creato: backup-master-ui-20260730-174622
+Font sincronizzato: contatti.html
+Footer sincronizzato: contatti.html
+CSS aggiunto: privacy.html
+Font sincronizzato: privacy.html
+Footer sincronizzato: privacy.html
+Font sincronizzato: chi-siamo.html
+Footer sincronizzato: chi-siamo.html
+Font sincronizzato: servizi/tinteggiature.html
+Footer sincronizzato: servizi/tinteggiature.html
+Font sincronizzato: servizi/pulizie-uffici-trento.html
+Footer sincronizzato: servizi/pulizie-uffici-trento.html
+Font sincronizzato: servizi/cartongesso.html
+Footer sincronizzato: servizi/cartongesso.html
+Font sincronizzato: servizi/aree-verdi.html
+Footer sincronizzato: servizi/aree-verdi.html
+Font sincronizzato: servizi/pulizie-condomini-trento.html
+Footer sincronizzato: servizi/pulizie-condomini-trento.html
+Font sincronizzato: servizi/pulizie-post-cantiere-trento.html
+Footer sincronizzato: servizi/pulizie-post-cantiere-trento.html
+Font sincronizzato: servizi/manutenzioni.html
+Footer sincronizzato: servizi/manutenzioni.html
+Font sincronizzato: servizi/sanificazione.html
+Footer sincronizzato: servizi/sanificazione.html
+Font sincronizzato: servizi/index.html
+Footer sincronizzato: servizi/index.html
+CSS Master UI applicato

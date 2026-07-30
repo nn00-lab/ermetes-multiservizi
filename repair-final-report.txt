@@ -1,0 +1,16 @@
+OK HERO IMAGE ./contatti.html
+MENU MANCANTE ./privacy.html
+CSS MANCANTE ./privacy.html
+OK HERO IMAGE ./chi-siamo.html
+FONT PRESENTE ./index.html
+OK HERO IMAGE ./index.html
+OK HERO IMAGE ./servizi/tinteggiature.html
+OK HERO IMAGE ./servizi/pulizie-uffici-trento.html
+OK HERO IMAGE ./servizi/cartongesso.html
+OK HERO IMAGE ./servizi/aree-verdi.html
+OK HERO IMAGE ./servizi/pulizie-condomini-trento.html
+OK HERO IMAGE ./servizi/pulizie-post-cantiere-trento.html
+OK HERO IMAGE ./servizi/manutenzioni.html
+OK HERO IMAGE ./servizi/sanificazione.html
+FONT PRESENTE ./servizi/index.html
+OK HERO IMAGE ./servizi/index.html

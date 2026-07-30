@@ -1,0 +1,21 @@
+ERMETES FINAL UX AUDIT
+
+Pagine analizzate:
+13
+
+Modifiche:
+./contatti.html modificata
+./chi-siamo.html modificata
+./servizi/tinteggiature.html modificata
+./servizi/pulizie-uffici-trento.html modificata
+./servizi/cartongesso.html modificata
+./servizi/aree-verdi.html modificata
+./servizi/pulizie-condomini-trento.html modificata
+./servizi/pulizie-post-cantiere-trento.html modificata
+./servizi/manutenzioni.html modificata
+./servizi/sanificazione.html modificata
+./servizi/index.html modificata
+
+Backup:
+backup-final-ux-20260730-175743
+
