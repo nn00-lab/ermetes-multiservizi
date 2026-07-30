@@ -4,11 +4,23 @@
 
 
 
-/* ================= CONFIG ================= */
+/*
+====================================
+CONFIGURAZIONE
+====================================
+*/
 
 
-const WEBHOOK_URL = "";
+const WEBHOOK_URL = ""; 
+// Inserire qui webhook n8n / CRM quando pronto
 
+
+
+/*
+====================================
+TRACKING GOOGLE
+====================================
+*/
 
 
 window.dataLayer = window.dataLayer || [];
@@ -18,7 +30,7 @@ function track(event,data={}){
 
 window.dataLayer.push({
 
-event,
+event:event,
 
 ...data
 
@@ -30,512 +42,73 @@ event,
 
 
 
-/* ================= SESSION DATA ================= */
-
-
-
-const params = new URLSearchParams(location.search);
-
-
-
-const leadId = crypto.randomUUID
-?
-crypto.randomUUID()
-:
-Date.now()+"-"+Math.random();
-
-
-
-const meta = {
-
-
-lead_uuid:leadId,
-
-landing_url:location.href,
-
-referrer:document.referrer || "direct",
-
-
-utm_source:params.get("utm_source") || "",
-
-utm_medium:params.get("utm_medium") || "",
-
-utm_campaign:params.get("utm_campaign") || "",
-
-utm_content:params.get("utm_content") || "",
-
-
-gclid:params.get("gclid") || "",
-
-fbclid:params.get("fbclid") || "",
-
-
-device:
-/Mobi/i.test(navigator.userAgent)
-?
-"mobile"
-:
-"desktop",
-
-
-started_at:new Date().toISOString()
-
-
-};
-
-
-
-
-Object.entries(meta).forEach(([key,value])=>{
-
-
-const el=document.getElementById(key);
-
-
-if(el){
-
-el.value=value;
-
-}
-
-
-});
-
-
-
 track(
 "page_view",
-meta
-);
-
-
-
-
-
-
-
-
-/* ================= CTA TRACKING ================= */
-
-
-
-document
-.querySelectorAll("[data-track]")
-.forEach(btn=>{
-
-
-btn.addEventListener("click",()=>{
-
-
-track(
-
-"cta_click",
-
 {
-
-label:btn.dataset.track,
-
-lead_uuid:leadId
-
+page:location.pathname
 }
-
-);
-
-
-});
-
-
-});
-
-
-
-
-
-
-
-/* ================= WIZARD ================= */
-
-
-const form=document.getElementById("leadForm");
-
-
-if(!form) return;
-
-
-
-const panels=[
-
-...form.querySelectorAll(".step-panel")
-
-];
-
-
-const total=panels.length;
-
-
-
-let step=1;
-
-
-
-const answers={
-
-cliente:"",
-
-servizio:""
-
-};
-
-
-
-const progress=document.getElementById("progressBar");
-
-
-const btnNext=document.getElementById("btnNext");
-
-
-const btnBack=document.getElementById("btnBack");
-
-
-const btnSubmit=document.getElementById("btnSubmit");
-
-
-
-
-
-function render(){
-
-
-panels.forEach(panel=>{
-
-
-panel.hidden =
-Number(panel.dataset.step)!==step;
-
-
-});
-
-
-
-progress.style.width =
-(step/total*100)+"%";
-
-
-
-btnBack.hidden =
-step===1;
-
-
-btnNext.hidden =
-step===total;
-
-
-btnSubmit.hidden =
-step!==total;
-
-
-
-track(
-
-"wizard_step",
-
-{
-
-step,
-
-lead_uuid:leadId
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-function error(id,msg){
-
-
-const el=document.getElementById("err-"+id);
-
-
-if(el){
-
-el.textContent=msg || "";
-
-}
-
-
-}
-
-
-
-
-
-function validate(){
-
-
-
-if(step===1){
-
-
-if(!answers.cliente){
-
-return false;
-
-}
-
-
-}
-
-
-
-if(step===2){
-
-
-if(!answers.servizio){
-
-return false;
-
-}
-
-
-}
-
-
-
-
-if(step===3){
-
-
-const value=
-document.getElementById("descrizione")
-.value.trim();
-
-
-
-if(!value){
-
-error(
-"descrizione",
-"Inserisci una descrizione"
-);
-
-
-return false;
-
-}
-
-}
-
-
-
-
-if(step===4){
-
-
-const value=
-document.getElementById("indirizzo")
-.value.trim();
-
-
-
-if(!value){
-
-error(
-"indirizzo",
-"Inserisci la località"
-);
-
-
-return false;
-
-}
-
-}
-
-
-
-
-
-if(step===6){
-
-
-const nome=
-document.getElementById("nome")
-.value.trim();
-
-
-
-const telefono=
-document.getElementById("telefono")
-.value.trim();
-
-
-
-const privacy=
-document.getElementById("privacy")
-.checked;
-
-
-
-if(!nome){
-
-error("nome","Inserisci nome");
-
-return false;
-
-}
-
-
-
-if(!telefono){
-
-error(
-"telefono",
-"Inserisci telefono"
-);
-
-return false;
-
-}
-
-
-
-if(!privacy){
-
-error(
-"privacy",
-"Accetta la privacy"
-);
-
-return false;
-
-}
-
-
-}
-
-
-
-return true;
-
-
-}
-
-
-
-
-
-
-
-
-/* ================= SCELTE ================= */
-
-
-document
-.querySelectorAll(".choice")
-.forEach(button=>{
-
-
-button.addEventListener("click",()=>{
-
-
-const field=
-button.dataset.field;
-
-
-
-answers[field]=
-button.dataset.value;
-
-
-
-button.parentElement
-.querySelectorAll(".choice")
-.forEach(b=>
-
-b.classList.remove("is-selected")
-
 );
 
 
 
-button.classList.add("is-selected");
+
+
+/*
+====================================
+FORM
+====================================
+*/
+
+
+const form =
+document.getElementById("leadForm");
 
 
 
-setTimeout(()=>{
+if(!form){
 
-btnNext.click();
-
-},200);
-
-
-
-});
-
-
-});
-
-
-
-
-
-
-
-btnNext.addEventListener("click",()=>{
-
-
-if(!validate()) return;
-
-
-
-if(step<total){
-
-step++;
-
-render();
+return;
 
 }
 
 
 
-});
+
+const submitButton =
+form.querySelector("button[type='submit']");
+
+
+
+
+/*
+====================================
+ANTI SPAM HONEYPOT
+====================================
+*/
+
+
+const honeypot =
+document.createElement("input");
+
+
+honeypot.type="text";
+
+honeypot.name="website";
+
+honeypot.style.display="none";
+
+
+form.appendChild(honeypot);
 
 
 
 
 
-
-btnBack.addEventListener("click",()=>{
-
-
-if(step>1){
-
-step--;
-
-render();
-
-}
-
-
-});
-
-
-
-
-
-
-
-
-
-/* ================= INVIO LEAD ================= */
-
+/*
+====================================
+SUBMIT
+====================================
+*/
 
 
 form.addEventListener(
@@ -547,76 +120,9 @@ e.preventDefault();
 
 
 
-if(!validate()) return;
 
 
-
-btnSubmit.disabled=true;
-
-
-btnSubmit.innerText=
-"Invio in corso...";
-
-
-
-
-
-const payload={
-
-
-...meta,
-
-
-cliente:
-answers.cliente,
-
-
-servizio:
-answers.servizio,
-
-
-descrizione:
-document.getElementById("descrizione").value,
-
-
-indirizzo:
-document.getElementById("indirizzo").value,
-
-
-nome:
-document.getElementById("nome").value,
-
-
-telefono:
-document.getElementById("telefono").value,
-
-
-email:
-document.getElementById("email").value,
-
-
-azienda:
-"Ermetes Società Cooperativa Sociale",
-
-
-created:
-new Date().toISOString()
-
-
-};
-
-
-
-
-
-/* ANTI BOT */
-
-
-if(
-document.getElementById("website").value
-){
-
-showSuccess();
+if(honeypot.value){
 
 return;
 
@@ -626,9 +132,75 @@ return;
 
 
 
+submitButton.disabled=true;
 
 
-try{
+submitButton.innerHTML=
+"Invio in corso...";
+
+
+
+
+
+const formData =
+new FormData(form);
+
+
+
+
+const lead = {
+
+
+nome:
+formData.get("nome"),
+
+
+telefono:
+formData.get("telefono"),
+
+
+email:
+formData.get("email"),
+
+
+servizio:
+formData.get("servizio"),
+
+
+messaggio:
+formData.get("messaggio"),
+
+
+
+pagina:
+window.location.href,
+
+
+data:
+new Date().toISOString()
+
+
+};
+
+
+
+
+
+
+
+track(
+"generate_lead",
+lead
+);
+
+
+
+
+
+
+
+try {
+
 
 
 if(WEBHOOK_URL){
@@ -643,17 +215,18 @@ WEBHOOK_URL,
 
 method:"POST",
 
-
 headers:{
+
 
 "Content-Type":
 "application/json"
+
 
 },
 
 
 body:
-JSON.stringify(payload)
+JSON.stringify(lead)
 
 
 }
@@ -666,19 +239,12 @@ JSON.stringify(payload)
 
 
 
-
-
-track(
-
-"generate_lead",
-
-payload
-
-);
 
 
 
 showSuccess();
+
+
 
 
 
@@ -688,81 +254,83 @@ showSuccess();
 catch(error){
 
 
-
-track(
-
-"lead_error",
-
-{
-
-message:error.message
-
-}
-
-);
+console.error(error);
 
 
 
 alert(
-
-"Errore invio. Contattaci telefonicamente."
-
+"Si è verificato un errore. Riprova oppure chiamaci direttamente."
 );
 
 
 
-btnSubmit.disabled=false;
+submitButton.disabled=false;
 
 
-btnSubmit.innerText=
-"Ricevi preventivo gratuito";
+submitButton.innerHTML=
+"Richiedi preventivo gratuito";
 
 
 
 }
-
 
 
 
 });
 
 
- 
 
+
+
+
+
+/*
+====================================
+SUCCESS MESSAGE
+====================================
+*/
 
 
 function showSuccess(){
 
 
-form.hidden=true;
+
+form.innerHTML=`
+
+<div class="success-box">
+
+<h3>
+Richiesta inviata ✔
+</h3>
 
 
-document
-.querySelector(".progress")
-.hidden=true;
+<p>
+
+Grazie per aver contattato Ermetes.
+Ti ricontatteremo al più presto per valutare il tuo intervento.
+
+</p>
 
 
+<a class="btn btn--cta"
+href="tel:+393513110662">
 
-document
-.getElementById("successPanel")
-.hidden=false;
+Chiama Ermetes
+
+</a>
+
+
+</div>
+
+`;
 
 
 
 track(
-
-"lead_success",
-
-{
-
-lead_uuid:leadId
-
-}
-
+"lead_success"
 );
 
 
-
 }
 
 
@@ -771,83 +339,41 @@ lead_uuid:leadId
 
 
 
+/*
+====================================
+CTA TRACKING
+====================================
+*/
 
-/* ================= SCROLL TRACK ================= */
+
+document
+.querySelectorAll(".btn")
+.forEach(btn=>{
 
 
-let max=0;
-
-
-
-window.addEventListener(
-"scroll",
+btn.addEventListener(
+"click",
 ()=>{
 
 
-const percent=Math.round(
-
-window.scrollY /
-
-(
-document.body.scrollHeight -
-window.innerHeight
-)
-
-*100
-
-);
-
-
-
-if(percent>max){
-
-max=percent;
-
-
-
-if(max%25===0){
-
-
 track(
-
-"scroll_depth",
-
+"cta_click",
 {
 
-percent:max,
-
-lead_uuid:leadId
+label:
+btn.innerText.trim()
 
 }
 
 );
 
 
-}
+});
 
 
-
-}
-
-
-},
-
-{
-
-passive:true
-
-}
-
-);
+});
 
 
-
-
-
-
-
-
-render();
 
 
 
