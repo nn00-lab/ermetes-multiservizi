@@ -1,177 +1,854 @@
 (function(){
-  "use strict";
 
-  // ====== CONFIG ======
-  const WEBHOOK_URL = ""; // <-- incolla qui l'URL webhook (n8n / Make / Zapier / Sheets / CRM)
-  window.dataLayer = window.dataLayer || [];
-  const dl = (event, payload) => window.dataLayer.push(Object.assign({event}, payload || {}));
+"use strict";
 
-  // ====== SESSION / LEAD META (in-memory, niente localStorage) ======
-  const qs = new URLSearchParams(location.search);
-  const uuid = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
-  const sessionId = uuid;
-  const meta = {
-    lead_uuid: uuid,
-    session_id: sessionId,
-    landing_url: location.href,
-    referrer: document.referrer || "direct",
-    utm_source: qs.get("utm_source") || "",
-    utm_medium: qs.get("utm_medium") || "",
-    utm_campaign: qs.get("utm_campaign") || "",
-    utm_content: qs.get("utm_content") || "",
-    gclid: qs.get("gclid") || "",
-    fbclid: qs.get("fbclid") || "",
-    ttclid: qs.get("ttclid") || "",
-    msclkid: qs.get("msclkid") || "",
-    device: /Mobi/i.test(navigator.userAgent) ? "mobile" : "desktop",
-    browser: navigator.userAgent,
-    viewport: `${innerWidth}x${innerHeight}`,
-    language: navigator.language,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    started_at: new Date().toISOString()
-  };
-  Object.entries(meta).forEach(([k, v]) => { const el = document.getElementById(k); if (el) el.value = v; });
-  dl("page_view", meta);
 
-  // ====== SCROLL / CTA TRACKING ======
-  let maxScroll = 0;
-  addEventListener("scroll", () => {
-    const pct = Math.round((scrollY / (document.body.scrollHeight - innerHeight)) * 100);
-    if (pct > maxScroll) { maxScroll = pct; if (maxScroll % 25 === 0) dl("scroll_depth", { percent: maxScroll, lead_uuid: uuid }); }
-  }, { passive: true });
 
-  document.querySelectorAll("[data-track]").forEach(el => {
-    el.addEventListener("click", () => dl("cta_click", { label: el.dataset.track, lead_uuid: uuid }));
-  });
+/* ================= CONFIG ================= */
 
-  // ====== WIZARD ======
-  const form = document.getElementById("leadForm");
-  const panels = [...form.querySelectorAll(".step-panel")];
-  const total = panels.length;
-  let step = 1;
-  let furthestStep = 1;
-  const answers = { cliente: "", servizio: "" };
 
-  const progressBar = document.getElementById("progressBar");
-  const btnBack = document.getElementById("btnBack");
-  const btnNext = document.getElementById("btnNext");
-  const btnSubmit = document.getElementById("btnSubmit");
+const WEBHOOK_URL = "";
 
-  function render() {
-    panels.forEach(p => p.hidden = Number(p.dataset.step) !== step);
-    progressBar.style.width = (step / total * 100) + "%";
-    progressBar.closest(".progress").setAttribute("aria-valuenow", step);
-    btnBack.hidden = step === 1;
-    btnNext.hidden = step === total;
-    btnSubmit.hidden = step !== total;
-    const panel = panels[step - 1];
-    const focusable = panel.querySelector("input,textarea,button");
-    if (focusable) focusable.focus({ preventScroll: true });
-    dl("step_view", { step, lead_uuid: uuid });
-  }
 
-  function setError(id, msg) { const el = document.getElementById("err-" + id); if (el) el.textContent = msg || ""; }
 
-  function validateStep(n) {
-    if (n === 1) return !!answers.cliente || (setError("cliente"), false);
-    if (n === 2) return !!answers.servizio || (setError("servizio"), false);
-    if (n === 3) {
-      const v = document.getElementById("descrizione").value.trim();
-      setError("descrizione", v ? "" : "Descrivi brevemente il lavoro.");
-      return !!v;
-    }
-    if (n === 4) {
-      const v = document.getElementById("indirizzo").value.trim();
-      setError("indirizzo", v ? "" : "Indica dove si trova.");
-      return !!v;
-    }
-    if (n === 5) return true; // foto opzionale
-    if (n === 6) {
-      const nome = document.getElementById("nome").value.trim();
-      const tel = document.getElementById("telefono").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const privacy = document.getElementById("privacy").checked;
-      let ok = true;
-      if (!nome) { setError("nome", "Inserisci nome e cognome."); ok = false; } else setError("nome", "");
-      if (!/^[+\d][\d\s]{6,}$/.test(tel)) { setError("telefono", "Numero di telefono non valido."); ok = false; } else setError("telefono", "");
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("email", "Email non valida."); ok = false; } else setError("email", "");
-      if (!privacy) { setError("privacy", "Devi accettare la privacy policy."); ok = false; } else setError("privacy", "");
-      return ok;
-    }
-    return true;
-  }
+window.dataLayer = window.dataLayer || [];
 
-  form.querySelectorAll(".choice").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const field = btn.dataset.field;
-      answers[field] = btn.dataset.value;
-      btn.parentElement.querySelectorAll(".choice").forEach(b => b.classList.remove("is-selected"));
-      btn.classList.add("is-selected");
-      setError(field, "");
-      setTimeout(() => btnNext.click(), 150);
-    });
-  });
 
-  btnNext.addEventListener("click", () => {
-    if (!validateStep(step)) return;
-    if (step < total) { step++; furthestStep = Math.max(furthestStep, step); render(); }
-  });
-  btnBack.addEventListener("click", () => { if (step > 1) { step--; render(); } });
+function track(event,data={}){
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!validateStep(6)) return;
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = "Invio in corso…";
+window.dataLayer.push({
 
-    const payload = Object.assign({}, meta, {
-      cliente: answers.cliente,
-      servizio: answers.servizio,
-      descrizione: document.getElementById("descrizione").value.trim(),
-      indirizzo: document.getElementById("indirizzo").value.trim(),
-      nome: document.getElementById("nome").value.trim(),
-      telefono: document.getElementById("telefono").value.trim(),
-      email: document.getElementById("email").value.trim(),
-      compilation_time_s: Math.round((Date.now() - Date.parse(meta.started_at)) / 1000),
-      submitted_at: new Date().toISOString()
-    });
+event,
 
-    // honeypot: se compilato, blocca silenziosamente come "successo" (anti-bot)
-    if (document.getElementById("website").value) {
-      showSuccess();
-      return;
-    }
+...data
 
-    try {
-      if (WEBHOOK_URL) {
-        await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      }
-      dl("generate_lead", payload);
-      // Meta Conversion API / Google Ads Enhanced Conversion: inviare server-side con payload.email/telefono hashati.
-      showSuccess();
-    } catch (err) {
-      dl("form_error", { lead_uuid: uuid, message: String(err) });
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = "Ricevi Preventivo Gratuito";
-      alert("Invio non riuscito. Riprova o chiamaci direttamente.");
-    }
-  });
+});
 
-  function showSuccess() {
-    form.hidden = true;
-    document.querySelector(".progress").hidden = true;
-    document.getElementById("successPanel").hidden = false;
-  }
+}
 
-  // ====== DROP-OFF TRACKING ======
-  addEventListener("beforeunload", () => {
-    if (!document.getElementById("successPanel").hidden) return;
-    dl("form_abandon", { last_step: step, lead_uuid: uuid });
-  });
 
-  render();
+
+
+
+/* ================= SESSION DATA ================= */
+
+
+
+const params = new URLSearchParams(location.search);
+
+
+
+const leadId = crypto.randomUUID
+?
+crypto.randomUUID()
+:
+Date.now()+"-"+Math.random();
+
+
+
+const meta = {
+
+
+lead_uuid:leadId,
+
+landing_url:location.href,
+
+referrer:document.referrer || "direct",
+
+
+utm_source:params.get("utm_source") || "",
+
+utm_medium:params.get("utm_medium") || "",
+
+utm_campaign:params.get("utm_campaign") || "",
+
+utm_content:params.get("utm_content") || "",
+
+
+gclid:params.get("gclid") || "",
+
+fbclid:params.get("fbclid") || "",
+
+
+device:
+/Mobi/i.test(navigator.userAgent)
+?
+"mobile"
+:
+"desktop",
+
+
+started_at:new Date().toISOString()
+
+
+};
+
+
+
+
+Object.entries(meta).forEach(([key,value])=>{
+
+
+const el=document.getElementById(key);
+
+
+if(el){
+
+el.value=value;
+
+}
+
+
+});
+
+
+
+track(
+"page_view",
+meta
+);
+
+
+
+
+
+
+
+
+/* ================= CTA TRACKING ================= */
+
+
+
+document
+.querySelectorAll("[data-track]")
+.forEach(btn=>{
+
+
+btn.addEventListener("click",()=>{
+
+
+track(
+
+"cta_click",
+
+{
+
+label:btn.dataset.track,
+
+lead_uuid:leadId
+
+}
+
+);
+
+
+});
+
+
+});
+
+
+
+
+
+
+
+/* ================= WIZARD ================= */
+
+
+const form=document.getElementById("leadForm");
+
+
+if(!form) return;
+
+
+
+const panels=[
+
+...form.querySelectorAll(".step-panel")
+
+];
+
+
+const total=panels.length;
+
+
+
+let step=1;
+
+
+
+const answers={
+
+cliente:"",
+
+servizio:""
+
+};
+
+
+
+const progress=document.getElementById("progressBar");
+
+
+const btnNext=document.getElementById("btnNext");
+
+
+const btnBack=document.getElementById("btnBack");
+
+
+const btnSubmit=document.getElementById("btnSubmit");
+
+
+
+
+
+function render(){
+
+
+panels.forEach(panel=>{
+
+
+panel.hidden =
+Number(panel.dataset.step)!==step;
+
+
+});
+
+
+
+progress.style.width =
+(step/total*100)+"%";
+
+
+
+btnBack.hidden =
+step===1;
+
+
+btnNext.hidden =
+step===total;
+
+
+btnSubmit.hidden =
+step!==total;
+
+
+
+track(
+
+"wizard_step",
+
+{
+
+step,
+
+lead_uuid:leadId
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
+function error(id,msg){
+
+
+const el=document.getElementById("err-"+id);
+
+
+if(el){
+
+el.textContent=msg || "";
+
+}
+
+
+}
+
+
+
+
+
+function validate(){
+
+
+
+if(step===1){
+
+
+if(!answers.cliente){
+
+return false;
+
+}
+
+
+}
+
+
+
+if(step===2){
+
+
+if(!answers.servizio){
+
+return false;
+
+}
+
+
+}
+
+
+
+
+if(step===3){
+
+
+const value=
+document.getElementById("descrizione")
+.value.trim();
+
+
+
+if(!value){
+
+error(
+"descrizione",
+"Inserisci una descrizione"
+);
+
+
+return false;
+
+}
+
+}
+
+
+
+
+if(step===4){
+
+
+const value=
+document.getElementById("indirizzo")
+.value.trim();
+
+
+
+if(!value){
+
+error(
+"indirizzo",
+"Inserisci la località"
+);
+
+
+return false;
+
+}
+
+}
+
+
+
+
+
+if(step===6){
+
+
+const nome=
+document.getElementById("nome")
+.value.trim();
+
+
+
+const telefono=
+document.getElementById("telefono")
+.value.trim();
+
+
+
+const privacy=
+document.getElementById("privacy")
+.checked;
+
+
+
+if(!nome){
+
+error("nome","Inserisci nome");
+
+return false;
+
+}
+
+
+
+if(!telefono){
+
+error(
+"telefono",
+"Inserisci telefono"
+);
+
+return false;
+
+}
+
+
+
+if(!privacy){
+
+error(
+"privacy",
+"Accetta la privacy"
+);
+
+return false;
+
+}
+
+
+}
+
+
+
+return true;
+
+
+}
+
+
+
+
+
+
+
+
+/* ================= SCELTE ================= */
+
+
+document
+.querySelectorAll(".choice")
+.forEach(button=>{
+
+
+button.addEventListener("click",()=>{
+
+
+const field=
+button.dataset.field;
+
+
+
+answers[field]=
+button.dataset.value;
+
+
+
+button.parentElement
+.querySelectorAll(".choice")
+.forEach(b=>
+
+b.classList.remove("is-selected")
+
+);
+
+
+
+button.classList.add("is-selected");
+
+
+
+setTimeout(()=>{
+
+btnNext.click();
+
+},200);
+
+
+
+});
+
+
+});
+
+
+
+
+
+
+
+btnNext.addEventListener("click",()=>{
+
+
+if(!validate()) return;
+
+
+
+if(step<total){
+
+step++;
+
+render();
+
+}
+
+
+
+});
+
+
+
+
+
+
+btnBack.addEventListener("click",()=>{
+
+
+if(step>1){
+
+step--;
+
+render();
+
+}
+
+
+});
+
+
+
+
+
+
+
+
+
+/* ================= INVIO LEAD ================= */
+
+
+
+form.addEventListener(
+"submit",
+async function(e){
+
+
+e.preventDefault();
+
+
+
+if(!validate()) return;
+
+
+
+btnSubmit.disabled=true;
+
+
+btnSubmit.innerText=
+"Invio in corso...";
+
+
+
+
+
+const payload={
+
+
+...meta,
+
+
+cliente:
+answers.cliente,
+
+
+servizio:
+answers.servizio,
+
+
+descrizione:
+document.getElementById("descrizione").value,
+
+
+indirizzo:
+document.getElementById("indirizzo").value,
+
+
+nome:
+document.getElementById("nome").value,
+
+
+telefono:
+document.getElementById("telefono").value,
+
+
+email:
+document.getElementById("email").value,
+
+
+azienda:
+"Ermetes Società Cooperativa Sociale",
+
+
+created:
+new Date().toISOString()
+
+
+};
+
+
+
+
+
+/* ANTI BOT */
+
+
+if(
+document.getElementById("website").value
+){
+
+showSuccess();
+
+return;
+
+}
+
+
+
+
+
+
+
+try{
+
+
+if(WEBHOOK_URL){
+
+
+await fetch(
+
+WEBHOOK_URL,
+
+{
+
+
+method:"POST",
+
+
+headers:{
+
+"Content-Type":
+"application/json"
+
+},
+
+
+body:
+JSON.stringify(payload)
+
+
+}
+
+
+);
+
+
+}
+
+
+
+
+
+track(
+
+"generate_lead",
+
+payload
+
+);
+
+
+
+showSuccess();
+
+
+
+
+}
+
+catch(error){
+
+
+
+track(
+
+"lead_error",
+
+{
+
+message:error.message
+
+}
+
+);
+
+
+
+alert(
+
+"Errore invio. Contattaci telefonicamente."
+
+);
+
+
+
+btnSubmit.disabled=false;
+
+
+btnSubmit.innerText=
+"Ricevi preventivo gratuito";
+
+
+
+}
+
+
+
+
+});
+
+
+ 
+
+
+
+function showSuccess(){
+
+
+form.hidden=true;
+
+
+document
+.querySelector(".progress")
+.hidden=true;
+
+
+
+document
+.getElementById("successPanel")
+.hidden=false;
+
+
+
+track(
+
+"lead_success",
+
+{
+
+lead_uuid:leadId
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ================= SCROLL TRACK ================= */
+
+
+let max=0;
+
+
+
+window.addEventListener(
+"scroll",
+()=>{
+
+
+const percent=Math.round(
+
+window.scrollY /
+
+(
+document.body.scrollHeight -
+window.innerHeight
+)
+
+*100
+
+);
+
+
+
+if(percent>max){
+
+max=percent;
+
+
+
+if(max%25===0){
+
+
+track(
+
+"scroll_depth",
+
+{
+
+percent:max,
+
+lead_uuid:leadId
+
+}
+
+);
+
+
+}
+
+
+
+}
+
+
+},
+
+{
+
+passive:true
+
+}
+
+);
+
+
+
+
+
+
+
+
+render();
+
+
+
 })();
